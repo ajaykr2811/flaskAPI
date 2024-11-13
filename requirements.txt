@@ -1,1 +1,20 @@
-/var/folders/33/68zsq9sx6jxc3f1_51b1j5f80000gn/T/com.apple.useractivityd/shared-pasteboard/items/CFD6246B-E8C9-45FB-A421-4216D9385AD4/4a063a17589d4b645ff8d76567c3833e71da2a8e.rtfd
+Flask==3.0.3
+pymongo==4.8.0b0
+ariadne==0.17.1
+openpyxl==3.1.0
+python-magic==0.4.27
+GitPython==3.1.43
+celery==5.2.6
+redis==4.5.4
+hvac=1.0.2
+cryptography==42.0.5 pycryptodomex==3.20.0
+validators==0.33.0
+PyJWT==2.4.0
+python-keycloak==4.2.0
+requests==2.32.3
+Flask-Limiter==3.3.1
+aiohttp==3.10.5
+concurrent-log-handler==0.9.25
+boto3==1.35.11
+azure-identity=-1.17.1
+azure-keyvault-secrets==4.8.0
