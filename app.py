@@ -1,61 +1,47 @@
 from flask import Flask, request
-from flask_restful import Api, Resource
-import os,json
+import datetime
+app =  Flask(__name__)
 
-app = Flask(__name__)
-api = Api(app)
+@app.route("/")
+def home():
+    return "Hello Everyone !"
 
-users_data = {
-    "1": {"name": "Alice", "age": 25, "location": "New York"},
-    "2": {"name": "Bob", "age": 30, "location": "Los Angeles"},
-    "3": {"name": "Charlie", "age": 22, "location": "Chicago"},
-    "4": {"name": "David", "age": 28, "location": "Houston"},
-    "5": {"name": "Eve", "age": 35, "location": "Phoenix"},
-    "6": {"name": "Frank", "age": 27, "location": "Philadelphia"},
-    "7": {"name": "Grace", "age": 29, "location": "San Antonio"},
-    "8": {"name": "Hank", "age": 24, "location": "San Diego"},
-    "9": {"name": "Ivy", "age": 31, "location": "Dallas"},
-    "10": {"name": "Jack", "age": 26, "location": "San Jose"}
-}
+@app.route("/greet/<name>")
+def greet(name):
+    return f"Hello {name} how, how are you?"
 
-'''
-# File to store user data
-USER_DATA_FILE = "users_data.json"
-
-# Function to load data from JSON file
-def load_data():
-    if os.path.exists(USER_DATA_FILE):
-        with open(USER_DATA_FILE, "r") as file:
-            try:
-                return json.load(file) or {}  # Return {} if the file is empty
-            except json.JSONDecodeError:
-                return {}  # Return an empty dict if JSON is invalid
-    return {}
-
-# Function to save data to JSON file
-def save_data(data):
-    with open(USER_DATA_FILE, "w") as file:
-        json.dump(data, file)
-
-# Load initial data
-users_data = load_data()
-'''
-
-class hello_world(Resource):
-    def get(self,user_id):
-        return users_data.get(user_id,{"error": "user not found"}), 200
+@app.route("/user_info/")
+def user_info():
+    name = request.args.get("Name", type=str)
+    age = request.args.get("Age", type=int)
+    place = request.args.get("Place", type=str)
     
-    def post(self):
-        data = request.get_json()
-        user_id = len(users_data) + 1
-        users_data[user_id] = {
-            "name": data["name"],
-            "age": data["age"],
-            "location": data["location"]
-        }
-        return {"info": f"user added with ID {user_id}"}, 201
+    return f'Hi {name} you born in {2024 - age} in {place}'
+
+@app.route('/square/<num>')
+def square(num):
+    return {
+        "result" : int(num)**2,
+        "status" : "success",
+        "code" : 200
+    }, 200
+
+@app.route('/div')
+def div():
+    num1 = request.args.get("num1", type=int)
+    num2 = request.args.get("num2", type=int)
+    if num2 < 1:
+        return "num2 should be greater then 0", 200
     
-api.add_resource(hello_world, "/<string:user_id>","/")
+    return f"{num1} divided by {num2} is {num1/num2}"
+
+@app.route("/info")
+def info():
+    return {
+        "Name" : "Koko",
+        "Data" : datetime.datetime.now(),
+        "Progress" : "Day 2 complete"
+    }
 
 if __name__ == "__main__":
     app.run(debug=True)
