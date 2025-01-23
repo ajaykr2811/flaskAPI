@@ -1,6 +1,13 @@
 from flask import Flask, request
 import datetime
+import validators
+from pymongo import MongoClient
+
 app =  Flask(__name__)
+
+client = MongoClient("mongodb://localhost:27017")
+db = client['flask_mongo_db']
+collection = db['users']
 
 @app.route("/")
 def home():
@@ -42,6 +49,29 @@ def info():
         "Data" : datetime.datetime.now(),
         "Progress" : "Day 2 complete"
     }
+
+@app.route("/email_validation")
+def email_validation():
+    email_id = request.args.get("email_id",type=str)
+    response = {
+        "email_id": email_id,
+        "valid": False
+    }
+
+    if validators.email(email_id):
+        response["valid"] = True
+        return response, 200
+    
+    return response, 400
+
+@app.route("/test_db_connection", methods=['GET'])
+def test_db_connection():
+    try:
+        client.server_info()
+        return {'message': 'Connected to MongoDB'}, 200
+    except Exception as e:
+        return {'error': str(e)}, 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
