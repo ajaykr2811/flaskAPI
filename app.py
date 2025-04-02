@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import datetime
 import validators
 from pymongo import MongoClient
@@ -6,8 +6,9 @@ from pymongo import MongoClient
 app =  Flask(__name__)
 
 client = MongoClient("mongodb://localhost:27017")
-db = client['flask_mongo_db']
-collection = db['users']
+#client = MongoClient("mongodb://fastapi.hrhgtpe.mongodb.net")
+db = client['User']
+collection = db['user_info']
 
 @app.route("/")
 def home():
@@ -17,13 +18,16 @@ def home():
 def greet(name):
     return f"Hello {name} how, how are you?"
 
-@app.route("/user_info/")
+@app.route("/user_info",methods=["POST"])
 def user_info():
-    name = request.args.get("Name", type=str)
-    age = request.args.get("Age", type=int)
-    place = request.args.get("Place", type=str)
+    request_data = request.get_json()
+    req_params = ['name','location','age']
+    missing_params = [params for params in req_params if params not in request_data]
+    if missing_params:
+        return f"reqired parameter {missing_params} are missing", 400
+    collection.insert_one(request_data)
     
-    return f'Hi {name} you born in {2024 - age} in {place}'
+    return f"Hi {request_data.get('name','')} you born in {2024 - request_data['age']} in {request_data['location']}"
 
 @app.route('/square/<num>')
 def square(num):
@@ -72,6 +76,32 @@ def test_db_connection():
     except Exception as e:
         return {'error': str(e)}, 500
 
+@app.route("/get_all_users",methods=["GET"])
+def get_all_users():
+    data = list(collection.find({},{"_id":0}))  # Use find() to get all documents and convert to list
+    return jsonify(data), 200
 
+@app.route("/update_email",methods=["POST"])
+def update_email():
+    request_data = request.get_json()
+    user = collection.update_one(
+        {'name':request_data['name']},
+        {'$set' : {'email':request_data['email']}}
+    )
+    if user.matched_count:
+        return {'message':f"Email id is updated for {request_data['name']}"}, 200
+    else:
+        return {'error': f"User name {request_data['name']} not found !!"}, 404
+
+@app.route("/delete_user",methods=["DELETE"])
+def delete_user():
+    request_data = request.get_json()
+    user = collection.delete_one(
+        {'name':request_data['name']}
+    )
+    if user.deleted_count:
+        return {'message':f"User info of {request_data['name']} deleted successfully "}, 200
+    else:
+        return {'error': f"User name {request_data['name']} not found !!"}, 404
 if __name__ == "__main__":
     app.run(debug=True)
