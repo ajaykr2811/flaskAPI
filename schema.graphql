@@ -4,6 +4,15 @@ type Query {
   getUserByName(name: String!): User
 }
 
+type Mutation {
+    updateEmail(name: String!, email: String!) : ResponseMessage
+}
+
+type ResponseMessage {
+    success: Boolean!
+    message: String!
+}
+
 type User {
   name: String!
   age: Int

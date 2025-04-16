@@ -1,6 +1,7 @@
-from ariadne import QueryType
+from ariadne import QueryType, MutationType
 
 query = QueryType()
+mutation = MutationType()
 
 @query.field("hello")
 def resolver_hello(_,info):
@@ -21,3 +22,22 @@ def resolver_getUserByName(_,info,name):
     if not user:
         return None
     return user
+
+@mutation.field("updateEmail")
+def resolver_updateEmail(_,info,name, email):
+    db = info.context['db']
+    update = db.update_one(
+        {"name":name},
+        {"$set":{"email":email}}
+    )
+    if update.matched_count == 0:
+        #raise GraphQLError(f"User '{name}' not found!")
+        return {
+            "success": False,
+            "message": f"User {name} is not found !"
+        }
+    return {
+        "success": True,
+        "message": f"email {email} is updated for {name}"
+    }
+    

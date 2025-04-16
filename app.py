@@ -5,7 +5,7 @@ from pymongo import MongoClient
 from flask_cors import CORS
 from ariadne import graphql_sync, make_executable_schema
 from ariadne.constants import PLAYGROUND_HTML
-from resolvers import query
+from resolvers import query, mutation
 
 app =  Flask(__name__)
 
@@ -113,7 +113,7 @@ def delete_user():
 
 # GraphQL schema
 type_defs = open("schema.graphql").read()
-schema = make_executable_schema(type_defs, query)
+schema = make_executable_schema(type_defs, [query,mutation])
 CORS(app)
 
 @app.route("/graphql", methods=["GET"])
