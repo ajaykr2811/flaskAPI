@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 import datetime
 import validators
 from pymongo import MongoClient
+from flask_cors import CORS
+from ariadne import graphql_sync, make_executable_schema
+from ariadne.constants import PLAYGROUND_HTML
+from resolvers import query
 
 app =  Flask(__name__)
 
@@ -103,5 +107,29 @@ def delete_user():
         return {'message':f"User info of {request_data['name']} deleted successfully "}, 200
     else:
         return {'error': f"User name {request_data['name']} not found !!"}, 404
+    
+#-------graphql--
+
+
+# GraphQL schema
+type_defs = open("schema.graphql").read()
+schema = make_executable_schema(type_defs, query)
+CORS(app)
+
+@app.route("/graphql", methods=["GET"])
+def graphql_playground():
+    return PLAYGROUND_HTML, 200
+
+@app.route("/graphql", methods=["POST"])
+def graphql_server():
+    data = request.get_json()
+    success, result = graphql_sync(
+        schema,
+        data,
+        context_value={"request": request, "db": collection},  # pass mongo collection
+        debug=True
+    )
+    return jsonify(result), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
